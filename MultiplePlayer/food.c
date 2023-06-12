@@ -5,8 +5,15 @@
 
 /********************************** Headers ***********************************/
 
+/* -------------------- Inclusion of Standard Headers ----------------------- */
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <math.h>
+
 /* ------------------------ Inclusion of Own Headers ------------------------ */
 #include "food.h"
+
 
 /************************ Definition of Public Methods ************************/
 
@@ -46,7 +53,8 @@ return food_n_ptr;
 
 /*FN****************************************************************************
 *
-*   FOOD_T  *FOOD_Set(FOOD_T *food_n_ptr,double *ti_food_n_ptr,SNAKE_T *snake_ptr, 
+*   FOOD_T  *FOOD_Set(FOOD_T *food_n_ptr,double *ti_food_n_ptr,
+*                     SNAKE_T *snake_1_ptr,SNAKE_T *snake_2_ptr, 
 *                    char stage[][STAGE_COLS],char stage_1[][STAGE_COLS] );
 *
 *   Return:  Pointer to food structure
@@ -56,7 +64,7 @@ return food_n_ptr;
 *   Plan:    
 *    		Part 1: Random food generator in stage 
 *           Part 2: Check food position inside the stage, not matching with 
-*					Snake position or with stage walls
+*					snakes positions or with stage walls
 *			Part 3: Take initial time for food appearance in stage 
 *
 *   Register of Revisions:
@@ -75,7 +83,8 @@ FOOD_T
 *FOOD_Set(
 FOOD_T *food_n_ptr,         /* In/Out: Structure of food status      */
 double *ti_food_n_ptr,      /* Out:    Pointer to initial time food  */
-SNAKE_T *snake_ptr,         /* In:     Snake ubication               */
+SNAKE_T *snake_1_ptr,       /* In:     Snake 1 position              */
+SNAKE_T *snake_2_ptr,       /* In:     Snake 2 position              */
 char stage[][STAGE_COLS],   /* In:     Map of stage level 0          */ 
 char stage_1[][STAGE_COLS]) /* In:     Map of stage level 1          */ 
 {
@@ -85,16 +94,18 @@ food_n_ptr->ubication[0] = 1+rand()% (STAGE_ROWS-2);
 food_n_ptr->ubication[1] = 2+rand()% (STAGE_COLS-3);
 
 /* Part 2: Check food position inside the stage, not matching with 
-		   Snake position or with stage walls */
+		   snakes positions or with stage walls */
 while(
-	  ((snake_ptr->body_snake[0].ubication[0]==food_n_ptr->ubication[0]) && 
-	  (snake_ptr->body_snake[0].ubication[1]==food_n_ptr->ubication[1])) || 
+	  ((snake_1_ptr->body_snake[0].ubication[0]==food_n_ptr->ubication[0]) && 
+	  (snake_1_ptr->body_snake[0].ubication[1]==food_n_ptr->ubication[1])) ||
+      ((snake_2_ptr->body_snake[0].ubication[0]==food_n_ptr->ubication[0]) && 
+	  (snake_2_ptr->body_snake[0].ubication[1]==food_n_ptr->ubication[1])) ||	  
 	  (food_n_ptr->ubication[1]==STAGE_COLS-1) || (food_n_ptr->ubication[1]==0) ||
 	  (food_n_ptr->ubication[1]==STAGE_COLS-2) || (food_n_ptr->ubication[1]==1) ||  
 	  (food_n_ptr->ubication[0]==STAGE_ROWS-2) || (food_n_ptr->ubication[0]==1) ||
 	  (food_n_ptr->ubication[0]==STAGE_ROWS-1) || (food_n_ptr->ubication[0]==0) ||
 	  (stage[food_n_ptr->ubication[0]][food_n_ptr->ubication[1]] != 0) || 
-	  ((stage_1[food_n_ptr->ubication[0]][food_n_ptr->ubication[1]] != 0))){
+	  (stage_1[food_n_ptr->ubication[0]][food_n_ptr->ubication[1]] != 0)){
 	srand(time(0));	
 	food_n_ptr->ubication[0] = 1+rand()% (STAGE_ROWS-2);
 	food_n_ptr->ubication[1] = 2+rand()% (STAGE_COLS-3);
@@ -111,7 +122,8 @@ return food_n_ptr;
 /*FN****************************************************************************
 *
 *   int  FOOD_Get_Time(FOOD_T *food_n_ptr, double *ti_food_n_ptr,    
-*                      SNAKE_T *snake_ptr, char stage[][STAGE_COLS],   
+*                      SNAKE_T *snake_1_ptr, SNAKE_T *snake_2_ptr,
+*                       char stage[][STAGE_COLS],   
 *                      char stage_1[][STAGE_COLS]);
 *
 *   Purpose: Check if food time in the stage is completed
@@ -134,14 +146,16 @@ int
 FOOD_Get_Time(
 FOOD_T *food_n_ptr,           /* In: Structure of food status      */
 double *ti_food_n_ptr,        /* In: Pointer to initial time food  */
-SNAKE_T *snake_ptr,           /* In: Snake ubication               */
+SNAKE_T *snake_1_ptr,         /* In: Snake 1 position              */
+SNAKE_T *snake_2_ptr,         /* In: Snake 2 position              */
 char stage[][STAGE_COLS],     /* In: Map of stage level 0          */ 
 char stage_1[][STAGE_COLS])   /* In: Map of stage level 1          */
 {
 double Tf_food=(double)clock();
 double time_food=15;  
 if(((Tf_food - *ti_food_n_ptr) / CLOCKS_PER_SEC) >= time_food){
-	*FOOD_Set(food_n_ptr, ti_food_n_ptr,snake_ptr, stage, stage_1);
+	*FOOD_Set(food_n_ptr, ti_food_n_ptr,snake_1_ptr, 
+	          snake_2_ptr,stage, stage_1);
 } 
 return 1;
 
